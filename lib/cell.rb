@@ -17,6 +17,12 @@ class Cell
 		nil
 	end
 
+	def contains_piece?()
+		unless @piece.nil?
+			true
+		end
+	end
+
 	private
 	attr_writer :piece, :coord
 

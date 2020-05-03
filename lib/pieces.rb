@@ -70,7 +70,7 @@ class Pawn < Piece
 	end
 
 	def possible_moves(coord)
-		return [coord[0], coord[1] + 1]
+		[coord[0], coord[1] + 1]
 	end
 
 	def threatened_spaces(coord)
