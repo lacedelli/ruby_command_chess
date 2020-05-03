@@ -20,6 +20,8 @@ class Cell
 	def contains_piece?()
 		unless @piece.nil?
 			true
+		else
+			false
 		end
 	end
 

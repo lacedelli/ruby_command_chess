@@ -16,6 +16,16 @@ class Piece
 	private
 	attr_writer :color
 	
+	def valid_coordinates?(attempted_move)
+		if attempted_move[0] <= 0 || attempted_move[0] >= 9
+			false
+		elsif attempted_move[1] <= 0 || attempted_move[1] >= 9
+			false
+		else 
+			true
+		end
+	end
+
 	def str_to_int(str)
 		case str.downcase
 		when "a"
@@ -63,17 +73,35 @@ class Piece
 end
 
 class Pawn < Piece
-	attr_reader :color
+	attr_reader :color, :threat_spaces, :move_spaces
 
 	def initialize(color)
 		super(color)
+		@threat_spaces = []
+		@move_spaces = []
 	end
 
+	def update_position(coordinates)
+		@threat_spaces = threatened_spaces(coordinates)
+		@move_spaces = possible_moves(coord)
+	end
+
+	private
+	attr_writer :threat_spaces, :move_spaces
+
+	# TODO find a way to make it so that these moves
+	# get references to the cells on the game board
 	def possible_moves(coord)
-		[coord[0], coord[1] + 1]
+		# TODO add a clause that allows the pawn to move two spaces
+		# on first move
+		move = [coord[0], coord[1] + 1]
+		if valid_coordinates?(move)
+			return move
+		end
 	end
 
 	def threatened_spaces(coord)
+		# TODO implement valid_coordinates? on this method
 		spaces = []
 		coord_a = str_to_int(coord[0])
 		coord_b = coord[1]
