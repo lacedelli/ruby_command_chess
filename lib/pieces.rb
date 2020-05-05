@@ -86,15 +86,16 @@ class Pawn < Piece
 		{threat: threatened_spaces(coordinates),
 		 move: possible_moves(coordinates)}
 	end
+	
+	def update_moves(cells_hash)
+	end
 
 	private
 	attr_writer :threat_spaces, :move_spaces, :first_move
 
-	# TODO find a way to make it so that these moves
 	# get references to the cells on the game board
 	def possible_moves(coord)
 		coord_a = str_to_int(coord[0])
-		# TODO add a clause that allows the pawn to move two spaces
 		# on first move
 		if @first_move
 			@first_move = false
@@ -108,12 +109,15 @@ class Pawn < Piece
 	end
 
 	def threatened_spaces(coord)
-		# TODO implement valid_coordinates? on this method
 		spaces = []
 		coord_a = str_to_int(coord[0])
 		coord_b = coord[1]
-		spaces << [int_to_str(coord_a - 1), coord[1] + 1]
-		spaces << [int_to_str(coord_a + 1), coord[1] + 1]
+		if valid_coordinates?([coord_a - 1, coord[1] + 1])
+			spaces << [int_to_str(coord_a - 1), coord[1] + 1]
+		end
+		if valid_coordinates?([coord_a + 1, coord[1] + 1])
+			spaces << [int_to_str(coord_a + 1), coord[1] + 1]
+		end
 		spaces
 	end
 
