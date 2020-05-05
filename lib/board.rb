@@ -20,9 +20,13 @@ class Board
 
 	def get_cell(coord)
 		@grid.each do |row|
-			row.each do |cell|
-				p cell.coord
-			end
+			if row[0].coord[0] == coord[0]
+				row.each do |cell|
+					if cell.coord[1] == coord[1]
+						return cell
+					end
+				end
+			end	
 		end
 		nil
 	end
