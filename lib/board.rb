@@ -31,4 +31,17 @@ class Board
 		nil
 	end
 
+	# Receives a coordinate hash from a piece and returns a hash of cells
+	def coord_to_cell(coord)
+		coord.each do |key, array|
+			puts "inside key #{key}"
+			counter = 0
+			array.each do |cell|
+				puts "inside cell #{cell}"
+				coord[key][counter] = get_cell(cell)
+				counter += 1
+			end
+		end
+	end
+
 end
