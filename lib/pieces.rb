@@ -79,24 +79,31 @@ class Pawn < Piece
 		super(color)
 		@threat_spaces = []
 		@move_spaces = []
+		@first_move = true
 	end
 
-	def update_position(coordinates)
-		@threat_spaces = threatened_spaces(coordinates)
-		@move_spaces = possible_moves(coord)
+	def get_next_move_attack(coordinates)
+		{threat: threatened_spaces(coordinates),
+		 move: possible_moves(coordinates)}
 	end
 
 	private
-	attr_writer :threat_spaces, :move_spaces
+	attr_writer :threat_spaces, :move_spaces, :first_move
 
 	# TODO find a way to make it so that these moves
 	# get references to the cells on the game board
 	def possible_moves(coord)
+		coord_a = str_to_int(coord[0])
 		# TODO add a clause that allows the pawn to move two spaces
 		# on first move
-		move = [coord[0], coord[1] + 1]
-		if valid_coordinates?(move)
-			return move
+		if @first_move
+			@first_move = false
+			return [[int_to_str(coord_a), coord[1] + 2],[int_to_str(coord_a), coord[1] + 1]]
+		else
+			move = [coord_a, coord[1] + 1]
+			if valid_coordinates?(move)
+				return [int_to_str(coord_a), coord[1] + 1]
+			end
 		end
 	end
 
