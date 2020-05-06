@@ -33,33 +33,56 @@ class Board
 
 	def make_move(instruction)
 		# Parse the instruction 
-		long_notation = /^([KQBNR]|[kqbnr])?([a-h][1-8])(-|x)([a-h][1-8])/
+		long_notation = /^([KQBNR]|[kqbnr])?([a-h][1-8])(-|x|X)([a-h][1-8])/
 		match = long_notation.match(instruction)
 		# first letter should be upper case
-		unless match[1].nil?
+
+		unless match[1].nil?()
 			# Move affects pawn
 		else
 			# find starting coordinates
 			origin = get_cell(match[2])
-			if origin.nil?
+			if origin.nil?()
 				# TODO find a way to tell player nature of error
 				# outside of board
 				return nil
 			end
 		# Find operand
 			operand = get_cell(match[3])
-			if operand.nil?
+			if operand.nil?()
 				# TODO Tell player nature of error 
 				return nil 
 			end
 		# find ending coordinates
 			destination = get_cell(match[4])
-			if destination.nil?
+			if destination.nil?()
 				# TODO Tell player nature of error
 				return nil
 			end
 		# confirm that a piece exists in selected space
 			unless origin.has_piece?
+				piece = origin.piece()
+				if operand == "-"
+					unless destination.has_piece?()
+						# TODO will raise an error since it doesn't 
+						# transform string to array
+						if piece.move.include?(destination)
+							move_piece(origin, destination)
+						else
+							# TODO tell the playen nature of error
+							return nil
+					else
+						# TODO tell the player nature of error
+						return nil
+					end
+				elsif operand == "x" || operand == "X"
+					# TODO Check that there's a piece of 
+					# different color on destination
+					#
+					# check that destination is in piece's 
+					# threatened spaces	
+				end
+
 		# confirm that piece is the type specified
 		# confirm that the movement the player asked is valid
 		# if x was found instead of dash, check for capture
