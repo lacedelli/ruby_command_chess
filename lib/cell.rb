@@ -17,7 +17,7 @@ class Cell
 		nil
 	end
 
-	def contains_piece?()
+	def has_piece?()
 		unless @piece.nil?
 			true
 		else
