@@ -1,8 +1,15 @@
 class Piece
-	attr_reader :color
+	attr_reader :color, :threat_spaces, :move_spaces
 
 	def initialize(color)
 		@color = color
+		@threat_spaces = []
+		@move_spaces = []
+	end
+
+	def get_next_move_attack(coordinates)
+		{threat: threatened_spaces(coordinates),
+		 move: possible_moves(coordinates)}
 	end
 
 	def same_color?(piece)
@@ -14,7 +21,7 @@ class Piece
 	end
 
 	private
-	attr_writer :color
+	attr_writer :color, :threat_spaces, :move_spaces
 	
 	def valid_coordinates?(attempted_move)
 		if attempted_move[0] <= 0 || attempted_move[0] >= 9
@@ -73,52 +80,57 @@ class Piece
 end
 
 class Pawn < Piece
-	attr_reader :color, :threat_spaces, :move_spaces
+	attr_reader :name
 
 	def initialize(color)
 		super(color)
-		@threat_spaces = []
-		@move_spaces = []
 		@first_move = true
+		@name = "Pawn"
 	end
 
-	def get_next_move_attack(coordinates)
-		{threat: threatened_spaces(coordinates),
-		 move: possible_moves(coordinates)}
+	def update_moves()
 	end
-	
-	def update_moves(cells_hash)
+
+	def moved()
+		if @first_move 
+			@first_move = false
+		end
 	end
 
 	private
-	attr_writer :threat_spaces, :move_spaces, :first_move
+	attr_writer :first_move
 
-	# get references to the cells on the game board
 	def possible_moves(coord)
-		coord_a = str_to_int(coord[0])
-		# on first move
-		if @first_move
-			@first_move = false
-			return [[int_to_str(coord_a), coord[1] + 2],[int_to_str(coord_a), coord[1] + 1]]
-		else
-			move = [coord_a, coord[1] + 1]
-			if valid_coordinates?(move)
-				return [int_to_str(coord_a), coord[1] + 1]
-			end
-		end
 	end
 
 	def threatened_spaces(coord)
-		spaces = []
-		coord_a = str_to_int(coord[0])
-		coord_b = coord[1]
-		if valid_coordinates?([coord_a - 1, coord[1] + 1])
-			spaces << [int_to_str(coord_a - 1), coord[1] + 1]
-		end
-		if valid_coordinates?([coord_a + 1, coord[1] + 1])
-			spaces << [int_to_str(coord_a + 1), coord[1] + 1]
-		end
-		spaces
+	end
+
+end
+
+class Rook < Piece
+
+	def initialize(color)
+		super(color)
+	end
+
+	def update_moves(cells_hash)
+		# TODO iterate over move hash 
+		# append position if there's no piece on it
+		# 
+	end
+
+	private
+	
+	def possible_moves()
+		moves = {up: [], down: [], left: [], right: []}
+		# TODO 
+		# travese the board in each direction, adding each
+		# valid coordinate to its respective direction
+	end
+
+	def threatened_spaces()
+		possible_moves()
 	end
 
 end
