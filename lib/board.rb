@@ -9,9 +9,7 @@ class Board
 		counter = 0
 		hor_range.each do |col|
 			@grid << []
-			p col
 			8.times do |row|
-				p row + 1
 				@grid[counter] << Cell.new([col, row + 1])
 			end
 			counter += 1
@@ -35,28 +33,27 @@ class Board
 		# Parse the instruction 
 		long_notation = /^([KQBNR]|[kqbnr])?([a-h][1-8])(-|x|X)([a-h][1-8])/
 		match = long_notation.match(instruction)
-		# first letter should be upper case
-
-		unless match[1].nil?()
+		piece_str = match[1]
+		if piece_str.nil?()
 			# Move affects pawn
+			puts "entered pawn clause"
 		else
 			# find starting coordinates
 			origin = get_cell(match[2])
 			if origin.nil?()
-				# TODO find a way to tell player nature of error
-				# outside of board
+				puts "couldn't find origin coordinates, remember they range from a1 to h8"
 				return nil
 			end
 		# Find operand
-			operand = get_cell(match[3])
+			operand = match[3]
 			if operand.nil?()
-				# TODO Tell player nature of error 
+				puts "Couldn't recognize the operand, remember to use '-' or 'x'"
 				return nil 
 			end
 		# find ending coordinates
 			destination = get_cell(match[4])
 			if destination.nil?()
-				# TODO Tell player nature of error
+				puts "couldn't find destination coordinates, remember they range from a1 to h8"
 				return nil
 			end
 		# confirm that a piece exists in selected space
@@ -64,23 +61,37 @@ class Board
 				piece = origin.piece()
 				if operand == "-"
 					unless destination.has_piece?()
-						# TODO will raise an error since it doesn't 
-						# transform string to array
-						if piece.move.include?(destination)
-							move_piece(origin, destination)
+						if check_piece?(piece, piece_str)
+							if piece.move.include?(destination.split(""))
+								move_piece(origin, destination)
+							else
+								puts "The #{piece.name} at #{origin.coord.join} cannot move to #{destination.coord.join}"
+								return nil
+							end
 						else
-							# TODO tell the playen nature of error
+							puts "The piece at #{origin.coord.join()} is not the a #{piece_str}"
 							return nil
+						end
 					else
-						# TODO tell the player nature of error
+						puts "The space at #{origin.coord.join} doesn't have a piece on it"
 						return nil
 					end
 				elsif operand == "x" || operand == "X"
 					# TODO Check that there's a piece of 
 					# different color on destination
-					#
+					unless origin.piece.same_color?(destination.piece)
 					# check that destination is in piece's 
 					# threatened spaces	
+						if origin.piece.threat_spaces.include?(destination)
+							capture_piece(origin, destination)
+						else
+							# TODO tell player nature of error
+							return nil
+						end
+					else
+						# TODO tell player nature of error
+						return nil
+					end
 				end
 
 		# confirm that piece is the type specified
@@ -113,10 +124,46 @@ class Board
 	end
 
 	def get_cell(coordinates)
-		# split coordinates into array
-		# TODO scan the whole board for the
-		# coordinates given, if found, return it
-		# otherwise return nil
+		coord = coordinates.split("")
+		columns = ("a".."h")
+		counter = 0
+		columns.each do |col|
+			if col == coord[0]
+				8.times do |row|
+					if row + 1 == coord[1].to_i
+						return @grid[counter][row]
+					end
+				end
+			end
+			counter += 1
+		end
+		nil
 	end
 
+	def check_piece?(piece, p_input)
+		# TODO Check if the specified piece 
+		# is the type the player asserts it to be
+		case piece
+		when instance_of?(Queen)
+			if p_input.upcase() == "Q"
+				return true
+			end
+		when instance_of?(King)
+			if p_input.upcase() == "K"
+				return true
+			end
+		when instance_of?(Bishop)
+			if p_input.upcase() == "B"
+				return true
+			end
+		when instance_of?(Rook)
+			if p_input.upcase() == "R"
+				return true
+			end
+		when instance_of?(Knight)
+			if p_input.upcase() == "N"
+				return true
+			end
+		end
+	end
 end
