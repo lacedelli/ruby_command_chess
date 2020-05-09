@@ -19,11 +19,15 @@ class Board
 	def update_board()
 		@grid.each do |column|
 			column.map do |cell|
-				unless cell.contains_piece?()
+				unless cell.has_piece?()
 					next
 				else
-					# TODO update the move & threat values
-					# of cell.piece.move && cell.piece.threat
+					piece = cell.piece()
+					piece_moves = piece.get_moves(cell.coord)
+					piece_threats = piece.get_threats(cell.coord)
+					moves_arr = get_move_spaces(piece_moves)
+					threats_arr = get_threat_spaces(piece_threats, piece.color)
+					piece.update_moves(moves_arr, threats_arr)
 				end
 			end
 		end
@@ -115,7 +119,55 @@ class Board
 	def create_piece(piece, coord)
 		cell = get_cell(coord)
 		cell.set_piece(piece)
-		# TODO Set the future moves for each piece
+		# Set the future moves for each piece
+		piece_moves = piece.get_moves(cell.coord)
+		piece_threats = piece.get_threats(cell.coord)
+		moves_arr = get_move_spaces(piece_moves)
+		threats_arr = get_threat_spaces(piece_threats, piece.color)
+		piece.update_moves(moves_arr, threats_arr)
+	end
+
+	def get_move_spaces(piece_moves)
+		moves_arr = []
+		piece_moves.map do |k, v|
+			v.each do |coordinates|
+				c = get_cell(coordinates)
+				if c.piece.nil?
+					moves_arr << coordinates
+				else
+					break
+				end
+			end
+		end
+		moves_arr
+	end
+
+	def get_threat_spaces(piece_threats, color)
+		threats_arr = []
+		piece_threats.map do |k, v|
+			v.each do |coordinates|
+				c = get_cell(coordinates)
+				if c.piece.nil?
+					next
+				else
+					unless c.piece.color == color
+						threats_arr << coordinates
+						break
+					end
+				end
+			end
+		end
+		threats_arr
+	end
+
+	def cycle_moves(array)
+		cells = []
+		array.each do |coord|
+			cell = get_cell(coord)
+			unless cell.piece.nil?
+				cells << cell
+			end
+		end
 	end
 
 	def move_piece(origin, destination)
@@ -134,7 +186,11 @@ class Board
 	end
 
 	def get_cell(coordinates)
-		coord = coordinates.split("")
+		if coordinates.is_a?(String)
+			coord = coordinates.split("")
+		elsif coordinates.is_a?(Array)
+			coord = coordinates
+		end
 		columns = ("a".."h")
 		counter = 0
 		columns.each do |col|
@@ -151,7 +207,7 @@ class Board
 	end
 
 	def check_piece?(piece, p_input)
-		# TODO Check if the specified piece 
+		# Check if the specified piece 
 		# is the type the player asserts it to be
 		case piece
 		when instance_of?(Queen)
