@@ -134,3 +134,15 @@ class Rook < Piece
 	end
 
 end
+
+class Bishop < Piece
+end
+
+class Knight < Piece
+end
+
+class Queen < Piece
+end
+
+class King < Piece
+end
