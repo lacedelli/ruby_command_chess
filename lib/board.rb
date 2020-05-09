@@ -105,8 +105,18 @@ class Board
 		end
 	end
 
+	def add_piece(piece, coord)
+		create_piece(piece, coord)
+	end
+
 	private
 	attr_writer :grid
+
+	def create_piece(piece, coord)
+		cell = get_cell(coord)
+		cell.set_piece(piece)
+		# TODO Set the future moves for each piece
+	end
 
 	def move_piece(origin, destination)
 		# TODO use a variable to hold origin.piece
