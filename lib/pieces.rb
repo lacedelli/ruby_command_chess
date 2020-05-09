@@ -91,7 +91,9 @@ class Pawn < Piece
 		@name = "Pawn"
 	end
 
-	def update_moves()
+	def update_moves(moves_arr, threat_arr)
+		@threat_spaces = threat_arr
+		@move_spaces = moves_arr
 	end
 
 	def moved()
@@ -107,12 +109,21 @@ class Pawn < Piece
 		moves = {}
 		coord_a = str_to_int(coord[0])
 		coord_b = coord[1]
-		moves[:up] = []
-		2.times do |step|
-			if valid_coordinates?([coord_a, coord_b + (step + 1)])
-				moves[:up] << [int_to_str(coord_a),coord_b + (step + 1)]
+		if @color == "white"
+			moves[:up] = []
+			2.times do |step|
+				if valid_coordinates?([coord_a, coord_b + (step + 1)])
+					moves[:up] << [int_to_str(coord_a),coord_b + (step + 1)]
+				end
 			end
-		end
+			elsif @color == "black"
+				moves[:down] = []
+				2.times do |step|
+					if valid_coordinates?([coord_a, coord_b + (-step - 1)])
+						moves[:down] << [int_to_str(coord_a), coord_b + (-step -1)]
+					end
+				end
+			end
 		moves
 	end
 
@@ -120,13 +131,24 @@ class Pawn < Piece
 		threats = {}
 		coord_a = str_to_int(coord[0])
 		coord_b = coord[1]
-		threats[:diag_up_left] = []
-		threats[:diag_up_right] = []
-		if valid_coordinates?([coord_a - 1, coord_b + 1])
-			threats[:diag_up_left] << [int_to_str(coord_a - 1), coord_b + 1]
-		end
-		if valid_coordinates?([coord_a + 1, coord_b + 1])
-			threats[:diag_up_right] << [int_to_str(coord_a + 1), coord_b + 1]
+		if @color == "white"
+			threats[:diag_up_left] = []
+			threats[:diag_up_right] = []
+			if valid_coordinates?([coord_a - 1, coord_b + 1])
+				threats[:diag_up_left] << [int_to_str(coord_a - 1), coord_b + 1]
+			end
+			if valid_coordinates?([coord_a + 1, coord_b + 1])
+				threats[:diag_up_right] << [int_to_str(coord_a + 1), coord_b + 1]
+			end
+		elsif @color == "black"
+			threats[:diag_down_left] = []
+			threats[:diag_down_right] = []
+			if valid_coordinates?([coord_a - 1, coord_b - 1])
+				threats[:diag_down_left] << [int_to_str(coord_a - 1), coord_b - 1]
+			end
+			if valid_coordinates?([coord_a - 1, coord_b + 1])
+				threats[:diag_down_left] << [int_to_str(coord_a - 1), coord_b + 1]
+			end
 		end
 		threats
 	end
