@@ -7,9 +7,12 @@ class Piece
 		@move_spaces = []
 	end
 
-	def get_next_move_attack(coordinates)
-		{threat: threatened_spaces(coordinates),
-		 move: possible_moves(coordinates)}
+	def get_moves(coord)
+		possible_moves(coord)
+	end
+
+	def get_threats(coord)
+		threatened_spaces(coord)
 	end
 
 	def same_color?(piece)
@@ -101,9 +104,31 @@ class Pawn < Piece
 	attr_writer :first_move
 
 	def possible_moves(coord)
+		moves = {}
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+		moves[:up] = []
+		2.times do |step|
+			if valid_coordinates?([coord_a, coord_b + (step + 1)])
+				moves[:up] << [int_to_str(coord_a),coord_b + (step + 1)]
+			end
+		end
+		moves
 	end
 
 	def threatened_spaces(coord)
+		threats = {}
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+		threats[:diag_up_left] = []
+		threats[:diag_up_right] = []
+		if valid_coordinates?([coord_a - 1, coord_b + 1])
+			threats[:diag_up_left] << [int_to_str(coord_a - 1), coord_b + 1]
+		end
+		if valid_coordinates?([coord_a + 1, coord_b + 1])
+			threats[:diag_up_right] << [int_to_str(coord_a + 1), coord_b + 1]
+		end
+		threats
 	end
 
 end
