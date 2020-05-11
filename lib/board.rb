@@ -130,6 +130,7 @@ class Board
 
 	def get_move_spaces(piece_moves)
 		moves_arr = []
+		p piece_moves
 		piece_moves.map do |k, v|
 			v.each do |coordinates|
 				c = get_cell(coordinates)

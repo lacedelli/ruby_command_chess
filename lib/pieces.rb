@@ -23,6 +23,12 @@ class Piece
 		end
 	end
 
+	def update_moves(moves_arr, threat_arr)
+		@threat_spaces = threat_arr
+		@move_spaces = moves_arr
+	end
+
+
 	private
 	attr_writer :color, :threat_spaces, :move_spaces
 	
@@ -91,11 +97,7 @@ class Pawn < Piece
 		@name = "Pawn"
 	end
 
-	def update_moves(moves_arr, threat_arr)
-		@threat_spaces = threat_arr
-		@move_spaces = moves_arr
-	end
-
+	
 	def moved()
 		if @first_move 
 			@first_move = false
@@ -161,23 +163,57 @@ class Rook < Piece
 		super(color)
 	end
 
-	def update_moves(cells_hash)
-		# TODO iterate over move hash 
-		# append position if there's no piece on it
-		# 
-	end
-
 	private
 	
-	def possible_moves()
+	def possible_moves(coord)
 		moves = {up: [], down: [], left: [], right: []}
-		# TODO 
 		# travese the board in each direction, adding each
 		# valid coordinate to its respective direction
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+		8.times do |step|
+			# check coord_a,coord_b + step
+			if valid_coordinates?([coord_a, coord_b + (1 + step)])
+				moves[:up] << [int_to_str(coord_a), coord_b + (1 + step)]
+			end
+			# check coord_a + step, coord_b
+			if valid_coordinates?([coord_a + (step + 1), coord_b])
+				moves[:right] << [int_to_str(coord_a + (step + 1)), coord_b]
+			end
+			# chech coord_a + -step, coord_b
+			if valid_coordinates?([coord_a + (-step - 1), coord_b])
+				moves[:left] << [int_to_str(coord_a + (-step - 1)), coord_b]
+			end
+			# check coord_a, coord_b + -step
+			if valid_coordinates?([coord_a, coord_b + (-step - 1)])
+				moves[:down] << [int_to_str(coord_a), coord_b + (-step - 1)]
+			end
+		end
+		moves
 	end
 
-	def threatened_spaces()
-		possible_moves()
+	def threatened_spaces(coord)
+		threats = {up: [], down: [], left: [], right: []}
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+		8.times do |step|
+			if valid_coordinates?([coord_a, coord_b + (1 + step)])
+				threats[:up] << [int_to_str(coord_a), coord_b + (1 + step)]
+			end
+			# check coord_a + step, coord_b
+			if valid_coordinates?([coord_a + (step + 1), coord_b])
+				threats[:right] << [int_to_str(coord_a + (step + 1)), coord_b]
+			end
+			# chech coord_a + -step, coord_b
+			if valid_coordinates?([coord_a + (-step - 1), coord_b])
+				threats[:left] << [int_to_str(coord_a + (-step - 1)), coord_b]
+			end
+			# check coord_a, coord_b + -step
+			if valid_coordinates?([coord_a, coord_b + (-step - 1)])
+				threats[:down] << [int_to_str(coord_a), coord_b + (-step - 1)]
+			end
+		end
+		threats
 	end
 
 end
