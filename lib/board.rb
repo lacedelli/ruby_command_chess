@@ -38,8 +38,9 @@ class Board
 		long_notation = /^([KQBNR]|[kqbnr])?([a-h][1-8])(-|x|X)([a-h][1-8])/
 		match = long_notation.match(instruction)
 		piece_str = match[1]
+
 		if piece_str.nil?()
-			# Move affects pawn
+			# TODO Move affects pawn
 			puts "entered pawn clause"
 		else
 			# find starting coordinates
@@ -89,11 +90,11 @@ class Board
 						if origin.piece.threat_spaces.include?(destination)
 							capture_piece(origin, destination)
 						else
-							# TODO tell player nature of error
+							puts "#{destination.coord.join()} isn't a threatened space by the selected piece."
 							return nil
 						end
 					else
-						# TODO tell player nature of error
+						puts "The piece at #{destination.coord.join} isn't a piece of the oppossite color."
 						return nil
 					end
 				end
