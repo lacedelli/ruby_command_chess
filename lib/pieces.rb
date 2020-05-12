@@ -219,6 +219,66 @@ class Rook < Piece
 end
 
 class Bishop < Piece
+
+	def initialize(color)
+		super(color)
+	end
+
+	private
+	
+	def possible_moves(coord)
+		moves = {up_right: [], down_right: [], down_left: [], up_left: []}
+		# travese the board in each direction, adding each
+		# valid coordinate to its respective direction
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+		8.times do |step|
+			# check coord_a + step, coord_b + step
+			if valid_coordinates?([coord_a + (step + 1), coord_b + (step + 1)])
+				moves[:up_right] << [int_to_str(coord_a + (step + 1)), coord_b + (step + 1)]
+			end
+			# check coord_a - step, coord_b + step
+			if valid_coordinates?([coord_a + (-step - 1), coord_b + (step + 1)])
+				moves[:up_left] << [int_to_str(coord_a + (-step - 1)), coord_b + (step + 1)]
+			end
+			# check coord_a + step, coord_b - step
+			if valid_coordinates?([coord_a + (step + 1), coord_b + (-step - 1)])
+				moves[:down_right] << [int_to_str(coord_a + (step + 1)), coord_b + (-step - 1)]
+			end
+			# check coord_a -step, coord_b -step
+			if valid_coordinates?([coord_a + (-step -1), coord_b + (-step -1)])
+				moves[:down_left] << [int_to_str(coord_a + (-step -1)), coord_b + (-step -1)]
+			end
+		end
+		moves
+	end
+
+	def threatened_spaces(coord)
+		threats = {up_right: [], down_right: [], down_left: [], up_left: []}
+		# travese the board in each direction, adding each
+		# valid coordinate to its respective direction
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+		8.times do |step|
+			# check coord_a + step, coord_b + step
+			if valid_coordinates?([coord_a + (step + 1), coord_b + (step + 1)])
+				threats[:up_right] << [int_to_str(coord_a + (step + 1)), coord_b + (step + 1)]
+			end
+			# check coord_a - step, coord_b + step
+			if valid_coordinates?([coord_a + (-step - 1), coord_b + (step + 1)])
+				threats[:up_left] << [int_to_str(coord_a + (-step - 1)), coord_b + (step + 1)]
+			end
+			# check coord_a + step, coord_b - step
+			if valid_coordinates?([coord_a + (step + 1), coord_b + (-step - 1)])
+				threats[:down_right] << [int_to_str(coord_a + (step + 1)), coord_b + (-step - 1)]
+			end
+			# check coord_a -step, coord_b -step
+			if valid_coordinates?([coord_a + (-step -1), coord_b + (-step -1)])
+				threats[:down_left] << [int_to_str(coord_a + (-step -1)), coord_b + (-step -1)]
+			end
+		end
+		threats
+	end
 end
 
 class Knight < Piece
