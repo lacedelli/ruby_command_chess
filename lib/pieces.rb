@@ -193,27 +193,7 @@ class Rook < Piece
 	end
 
 	def threatened_spaces(coord)
-		threats = {up: [], down: [], left: [], right: []}
-		coord_a = str_to_int(coord[0])
-		coord_b = coord[1]
-		8.times do |step|
-			if valid_coordinates?([coord_a, coord_b + (1 + step)])
-				threats[:up] << [int_to_str(coord_a), coord_b + (1 + step)]
-			end
-			# check coord_a + step, coord_b
-			if valid_coordinates?([coord_a + (step + 1), coord_b])
-				threats[:right] << [int_to_str(coord_a + (step + 1)), coord_b]
-			end
-			# chech coord_a + -step, coord_b
-			if valid_coordinates?([coord_a + (-step - 1), coord_b])
-				threats[:left] << [int_to_str(coord_a + (-step - 1)), coord_b]
-			end
-			# check coord_a, coord_b + -step
-			if valid_coordinates?([coord_a, coord_b + (-step - 1)])
-				threats[:down] << [int_to_str(coord_a), coord_b + (-step - 1)]
-			end
-		end
-		threats
+		possible_moves(coord)
 	end
 
 end
@@ -254,37 +234,116 @@ class Bishop < Piece
 	end
 
 	def threatened_spaces(coord)
-		threats = {up_right: [], down_right: [], down_left: [], up_left: []}
-		# travese the board in each direction, adding each
-		# valid coordinate to its respective direction
-		coord_a = str_to_int(coord[0])
-		coord_b = coord[1]
-		8.times do |step|
-			# check coord_a + step, coord_b + step
-			if valid_coordinates?([coord_a + (step + 1), coord_b + (step + 1)])
-				threats[:up_right] << [int_to_str(coord_a + (step + 1)), coord_b + (step + 1)]
-			end
-			# check coord_a - step, coord_b + step
-			if valid_coordinates?([coord_a + (-step - 1), coord_b + (step + 1)])
-				threats[:up_left] << [int_to_str(coord_a + (-step - 1)), coord_b + (step + 1)]
-			end
-			# check coord_a + step, coord_b - step
-			if valid_coordinates?([coord_a + (step + 1), coord_b + (-step - 1)])
-				threats[:down_right] << [int_to_str(coord_a + (step + 1)), coord_b + (-step - 1)]
-			end
-			# check coord_a -step, coord_b -step
-			if valid_coordinates?([coord_a + (-step -1), coord_b + (-step -1)])
-				threats[:down_left] << [int_to_str(coord_a + (-step -1)), coord_b + (-step -1)]
-			end
-		end
-		threats
+		possible_moves(coord)
 	end
 end
 
 class Knight < Piece
+
+	def initialize(color)
+		super(color)
+	end
+
+	private
+	
+	def possible_moves(coord)
+		moves = {upper_left: [], upper_right: [], right_up: [], right_down: [], bottom_right: [], bottom_left: [], left_down: [], left_up: []}
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+
+		temp_b = coord_b + 2
+		if valid_coordinates?([coord_a - 1, temp_b])
+			moves[:upper_left] << [int_to_str(coord_a - 1), temp_b]
+		end
+		if valid_coordinates?([coord_a + 1, temp_b])
+			moves[:upper_right] << [int_to_str(coord_a + 1), temp_b]
+		end
+
+		temp_a = coord_a + 2
+		if valid_coordinates?([temp_a, coord_b + 1])
+			moves[:right_up] << [int_to_str(temp_a), coord_b + 1]
+		end
+		if valid_coordinates?([temp_a, coord_b - 1])
+			moves[:right_down] << [int_to_str(temp_a), coord_b - 1]
+		end
+
+		temp_b = coord_b - 2
+		if valid_coordinates?([coord_a + 1, temp_b])
+			moves[:bottom_right] << [int_to_str(coord_a + 1), temp_b]
+		end
+		if valid_coordinates?([coord_a - 1, temp_b])
+			moves[:bottom_left] << [int_to_str(coord_a - 1), temp_b]
+		end
+
+		temp_a = coord_a - 2
+		if valid_coordinates?([temp_a, coord_b - 1])
+			moves[:left_down] << [int_to_str(temp_a), coord_b - 1]
+		end
+		if valid_coordinates?([temp_a, coord_b + 1])
+			moves[:left_up] << [int_to_str(temp_a), coord_b + 1]
+		end
+		moves
+	end
+
+	def threatened_spaces(coord)
+		possible_moves(coord)
+	end
+
 end
 
 class Queen < Piece
+
+	def initialize(color)
+		super(color)
+	end
+
+	private
+
+	def possible_moves(coord)
+		moves = {up: [], upper_right: [], right: [], lower_right: [], down: [], lower_left: [], left: [], upper_left: []}
+		coord_a = str_to_int(coord[0])
+		coord_b = coord[1]
+		8.times do |step|
+			# Check for coord_b + step
+			if valid_coordinates?([coord_a, coord_b + (step + 1)])
+				moves[:up] << [int_to_str(coord_a), coord_b + (step + 1)]
+			end
+			# Check for coord_a + step, coord_b + step
+			if valid_coordinates?([coord_a + (step + 1), coord_b + (step + 1)])
+				moves[:upper_right] << [int_to_str(coord_a + (step + 1)), coord_b + (step + 1)]
+			end
+			# Check for coord_a + step
+			if valid_coordinates?([coord_a + (step + 1), coord_b])
+				moves[:right] << [int_to_str(coord_a + (step + 1)), coord_b]
+			end
+			# Check for coord_a + step, coord_b - step
+			if valid_coordinates?([coord_a + (step + 1), coord_b + (-step - 1)])
+				moves[:lower_right] << [int_to_str(coord_a + (step + 1)), coord_b + (-step - 1)]
+			end
+			# Check for coord_b - step
+			if valid_coordinates?([coord_a, coord_b + (-step - 1)])
+				moves[:down] << [int_to_str(coord_a), coord_b + (-step - 1)]
+			end
+			# Check for coord_a - step, coord_b - step
+			if valid_coordinates?([coord_a + (-step - 1), coord_b + (-step - 1)])
+				moves[:lower_left] << [int_to_str(coord_a + (-step - 1)), coord_b + (-step - 1)]
+			end
+			# Check for coord_a - step
+			if valid_coordinates?([coord_a + (-step - 1), coord_b])
+				moves[:left] << [int_to_str(coord_a + (-step - 1)), coord_b]
+			end
+			# Check for coord_a - setp, coord_b + step
+			if valid_coordinates?([coord_a + (-step - 1), coord_b + (step + 1)])
+				moves[:upper_left] << [int_to_str(coord_a + (-step - 1)), coord_b + (-step - 1)]
+			end
+		end
+		moves
+	end
+
+	def threatened_spaces(coord)
+		possible_moves(coord)
+	end
+
 end
 
 class King < Piece
