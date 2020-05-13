@@ -27,6 +27,7 @@ class Piece
 	def update_moves(moves_arr, threat_arr)
 		@threat_spaces = threat_arr
 		@move_spaces = moves_arr
+		nil
 	end
 
 
@@ -103,6 +104,7 @@ class Pawn < Piece
 		if @first_move 
 			@first_move = false
 		end
+		nil
 	end
 
 	private
