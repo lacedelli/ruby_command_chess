@@ -47,15 +47,15 @@ class Board
 				printable_string << font_color
 				unless @grid[column][row].has_piece?
 					if pattern % 2 == 0
-						printable_string << bg_white << " "
+						printable_string << bg_white << "   "
 					else
-						printable_string << bg_magenta << " "
+						printable_string << bg_magenta << "   "
 					end
 				else
 					if pattern % 2 == 0
-						printable_string << bg_white << @grid[column][row].piece.symbol
+						printable_string << bg_white << " " << @grid[column][row].piece.symbol << " "
 					else
-						printable_string << bg_magenta << @grid[column][row].piece.symbol
+						printable_string << bg_magenta <<  " " << @grid[column][row].piece.symbol << " "
 					end
 				end
 					pattern += 1
