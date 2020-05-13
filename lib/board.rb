@@ -1,4 +1,5 @@
 require_relative "cell.rb"
+require_relative "pieces.rb"
 
 class Board
 	attr_reader :grid
@@ -31,6 +32,38 @@ class Board
 				end
 			end
 		end
+	end
+
+	def render_board()
+		# TODO increase the font size of the console
+		font_color = "\033[30m"
+		bg_magenta = "\033[45m"
+		bg_white = "\033[47m"
+		no_formatting = "\033[0m"
+		printable_string = ""
+		pattern = 0
+		(0..7).reverse_each do |row|
+			(0..7).each do |column|
+				printable_string << font_color
+				unless @grid[column][row].has_piece?
+					if pattern % 2 == 0
+						printable_string << bg_white << " "
+					else
+						printable_string << bg_magenta << " "
+					end
+				else
+					if pattern % 2 == 0
+						printable_string << bg_white << @grid[column][row].piece.symbol
+					else
+						printable_string << bg_magenta << @grid[column][row].piece.symbol
+					end
+				end
+					pattern += 1
+			end
+			pattern += 1
+			printable_string << no_formatting << "\n"
+		end
+		printable_string << no_formatting
 	end
 
 	def make_move(instruction)
@@ -110,8 +143,34 @@ class Board
 		end
 	end
 
-	def add_piece(piece, coord)
-		create_piece(piece, coord)
+	def set_pieces()
+		# Create white pieces
+		color = "white"
+		create_piece(Rook.new(color), "a1")
+		create_piece(Rook.new(color), "h1")
+		create_piece(Knight.new(color), "b1")
+		create_piece(Knight.new(color), "g1")
+		create_piece(Bishop.new(color), "c1")
+		create_piece(Bishop.new(color), "f1")
+		create_piece(Queen.new(color), "d1")
+		create_piece(King.new(color), "e1")
+		("a".."h").each do |letter|
+			create_piece(Pawn.new(color), "#{letter}2")
+		end
+		# Create black pieces
+		color = "black"
+		create_piece(Rook.new(color), "a8")
+		create_piece(Rook.new(color), "h8")
+		create_piece(Knight.new(color), "b8")
+		create_piece(Knight.new(color), "g8")
+		create_piece(Bishop.new(color), "c8")
+		create_piece(Bishop.new(color), "f8")
+		create_piece(Queen.new(color), "d8")
+		create_piece(King.new(color), "e8")
+		("a".."h").each do |letter|
+			create_piece(Pawn.new(color), "#{letter}7")
+		end
+
 	end
 
 	private
@@ -145,6 +204,10 @@ class Board
 	end
 
 	def get_threat_spaces(piece_threats, color)
+		# TODO Change this to work functionally on the same principle
+		# that get moves does, but with the threats hash of the piece
+		# because if we only account for the threatened spaces in which
+		# there ARE pieces currently dealing with checks is gonna be impossible
 		threats_arr = []
 		piece_threats.map do |k, v|
 			v.each do |coordinates|
@@ -235,3 +298,8 @@ class Board
 		end
 	end
 end
+
+
+b = Board.new()
+b.set_pieces()
+puts b.render_board()
