@@ -37,7 +37,6 @@ class Board
 	end
 
 	def render_board()
-		# TODO increase the font size of the console
 		font_color = "\033[30m"
 		bg_magenta = "\033[45m"
 		bg_white = "\033[47m"
@@ -74,74 +73,47 @@ class Board
 		match = long_notation.match(instruction)
 		piece_str = match[1]
 
+		# find starting coordinates
+		origin = get_cell(match[2])
+		if origin.nil?()
+			puts "couldn't find origin coordinates, remember they range from a1 to h8"
+			return false
+		end
+
+		# Find operand
+		operand = match[3]
+		if operand.nil?()
+			puts "Couldn't recognize the operand, remember to use '-' or 'x'"
+			return false 
+		end
+
+		# find ending coordinates
+		destination = get_cell(match[4])
+		if destination.nil?()
+			puts "couldn't find destination coordinates, remember they range from a1 to h8"
+			return false
+		end
+
 		if piece_str.nil?()
 			# TODO Move affects pawn
 			puts "entered pawn clause"
+			# Check if pawn is in coordinates
+			# if operand is -
+			# if move is in range
+			# move
+			# if operand is x or X
+			# if destination is in range
+			# if piece is in destination
+			# capture
 		else
-			# find starting coordinates
-			origin = get_cell(match[2])
-			if origin.nil?()
-				puts "couldn't find origin coordinates, remember they range from a1 to h8"
-				return nil
-			end
-		# Find operand
-			operand = match[3]
-			if operand.nil?()
-				puts "Couldn't recognize the operand, remember to use '-' or 'x'"
-				return nil 
-			end
-		# find ending coordinates
-			destination = get_cell(match[4])
-			if destination.nil?()
-				puts "couldn't find destination coordinates, remember they range from a1 to h8"
-				return nil
-			end
-		# confirm that a piece exists in selected space
-			unless origin.has_piece?
-				piece = origin.piece()
-				if operand == "-"
-					unless destination.has_piece?()
-						if check_piece?(piece, piece_str)
-							if piece.move.include?(destination.split(""))
-								move_piece(origin, destination)
-							else
-								puts "The #{piece.name} at #{origin.coord.join} cannot move to #{destination.coord.join}"
-								return nil
-							end
-						else
-							puts "The piece at #{origin.coord.join()} is not the a #{piece_str}"
-							return nil
-						end
-					else
-						puts "The space at #{origin.coord.join} doesn't have a piece on it"
-						return nil
-					end
-				elsif operand == "x" || operand == "X"
-					# TODO Check that there's a piece of 
-					# different color on destination
-					unless origin.piece.same_color?(destination.piece)
-					# check that destination is in piece's 
-					# threatened spaces	
-						if origin.piece.threat_spaces.include?(destination)
-							capture_piece(origin, destination)
-						else
-							puts "#{destination.coord.join()} isn't a threatened space by the selected piece."
-							return nil
-						end
-					else
-						puts "The piece at #{destination.coord.join} isn't a piece of the oppossite color."
-						return nil
-					end
-				end
-
-		# confirm that piece is the type specified
-		# confirm that the movement the player asked is valid
-		# if x was found instead of dash, check for capture
-		# execute move if all conditions are true
-		#
-		# if move is not parseable
-		# or if move is not actionable, ask player to input again
-			end
+			# confirm that a piece exists in selected space
+			# if operand is -
+			# if move is in piece's range
+			# move
+			# if operand is X or x
+			# if move is in pieces threats
+			# if enemy piece is in move
+			# capture
 		end
 	end
 
