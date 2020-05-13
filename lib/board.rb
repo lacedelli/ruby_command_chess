@@ -15,6 +15,7 @@ class Board
 			end
 			counter += 1
 		end
+		nil
 	end
 
 	def update_board()
@@ -32,6 +33,7 @@ class Board
 				end
 			end
 		end
+		nil
 	end
 
 	def render_board()
@@ -170,7 +172,7 @@ class Board
 		("a".."h").each do |letter|
 			create_piece(Pawn.new(color), "#{letter}7")
 		end
-
+		nil
 	end
 
 	private
@@ -185,11 +187,11 @@ class Board
 		moves_arr = get_move_spaces(piece_moves)
 		threats_arr = get_threat_spaces(piece_threats, piece.color)
 		piece.update_moves(moves_arr, threats_arr)
+		nil
 	end
 
 	def get_move_spaces(piece_moves)
 		moves_arr = []
-		p piece_moves
 		piece_moves.map do |k, v|
 			v.each do |coordinates|
 				c = get_cell(coordinates)
@@ -233,6 +235,7 @@ class Board
 				cells << cell
 			end
 		end
+		nil
 	end
 
 	def move_piece(origin, destination)
@@ -297,6 +300,7 @@ class Board
 			end
 		end
 	end
+	nil
 end
 
 
