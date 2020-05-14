@@ -40,6 +40,7 @@ class Board
 				end
 			end
 		end
+		# TODO Make a method that checks for check threats for king
 		nil
 	end
 
@@ -51,6 +52,7 @@ class Board
 		printable_string = ""
 		pattern = 0
 		(0..7).reverse_each do |row|
+			printable_string << " #{row + 1} "
 			(0..7).each do |column|
 				printable_string << font_color
 				unless @grid[column][row].has_piece?
@@ -71,7 +73,11 @@ class Board
 			pattern += 1
 			printable_string << no_formatting << "\n"
 		end
+		printable_string << "    a  b  c  d  e  f  g  h " << "\n"
+		printable_string << font_color << bg_white << " #{@white_captured.join(" ")}" << no_formatting << "\n"
+		printable_string << font_color << bg_white << " #{@black_captured.join(" ")}" << no_formatting << "\n"
 		printable_string << no_formatting
+		printable_string
 	end
 
 	def make_move(instruction, color)
@@ -271,9 +277,9 @@ class Board
 	def capture_piece(origin, destination)
 		captured = destination.remove_piece()
 		if captured.color == "white"
-			@white_captured << captured
+			@white_captured << captured.symbol()
 		else
-			@black_captured << captured
+			@black_captured << captured.symbol()
 		end
 		# call move_piece(origin, destination)
 		move_piece(origin, destination)
