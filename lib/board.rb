@@ -4,18 +4,25 @@ require_relative "pieces.rb"
 class Board
 	attr_reader :grid
 
-	def initialize()
-		@grid = []
-		hor_range = ("a".."h")
-		counter = 0
-		hor_range.each do |col|
-			@grid << []
-			8.times do |row|
-				@grid[counter] << Cell.new([col, row + 1])
+	def initialize(data = [])
+		unless data.empty?()
+			@grid = data
+		else
+			@grid = data
+			hor_range = ("a".."h")
+			counter = 0
+			hor_range.each do |col|
+				@grid << []
+				8.times do |row|
+					@grid[counter] << Cell.new([col, row + 1])
+				end
+				counter += 1
 			end
-			counter += 1
+			set_pieces()
 		end
-		nil
+		@white_captured = []
+		@black_captured = []
+			nil
 	end
 
 	def update_board()
@@ -67,8 +74,13 @@ class Board
 		printable_string << no_formatting
 	end
 
-	def make_move(instruction)
+	def make_move(instruction, color)
 		# Parse the instruction 
+		# TODO save if instruction is "save"
+		if instruction.downcase() == "save"
+			save_game()
+		end
+
 		long_notation = /^([KQBNR]|[kqbnr])?([a-h][1-8])(-|x|X)([a-h][1-8])/
 		match = long_notation.match(instruction)
 		piece_str = match[1]
@@ -95,18 +107,55 @@ class Board
 		end
 
 		if piece_str.nil?()
-			# TODO Move affects pawn
-			puts "entered pawn clause"
 			# Check if pawn is in coordinates
-			# if operand is -
-			# if move is in range
-			# move
-			# if operand is x or X
-			# if destination is in range
-			# if piece is in destination
-			# capture
+			if origin.piece.instance_of?(Pawn)
+			# Chech if pawn is same color as player
+				pawn = origin.piece
+				if pawn.color == color
+				# if operand is -
+					if operand == "-"
+					# if move is in range
+						if pawn.move_spaces.include?(destination.coord)
+						# move
+							move_piece(origin, destination)
+						else
+							puts "Piece at #{origin.coord.join()} can't move to #{destination.coord.join()}."
+							return false
+						end
+					# if operand is x or X
+					else
+					# if destination is in range
+						if pawn.threat_spaces.include?(destination.coord())
+					# if piece is in destination
+							if destination.has_piece?()
+								threatened_piece = destination.piece()
+								unless threatened_piece.color() == pawn.color
+									# capture
+									capture_piece(origin, destination)
+								else
+									puts "The piece at #{destination.coord.join()} is the same color as the attacker!"
+									return false
+								end
+							else
+								puts "The threatened space #{destination.coord.join()} is empty."
+								return false
+							end
+						else
+							puts "The selected piece doesn't threat #{destination.coord.join()}."
+							return false
+						end
+					end
+				else
+					puts "You selected a piece from a different color."
+					return false
+				end
+			else
+				puts "The piece at Coordinates #{origin.coord.join()} is not the type specified."
+				return false
+			end
 		else
 			# confirm that a piece exists in selected space
+			# confirm that piece is the kind specified
 			# if operand is -
 			# if move is in piece's range
 			# move
@@ -148,7 +197,7 @@ class Board
 	end
 
 	private
-	attr_writer :grid
+	attr_writer :grid, :white_captured, :black_captured
 
 	def create_piece(piece, coord)
 		cell = get_cell(coord)
@@ -178,16 +227,12 @@ class Board
 	end
 
 	def get_threat_spaces(piece_threats, color)
-		# TODO Change this to work functionally on the same principle
-		# that get moves does, but with the threats hash of the piece
-		# because if we only account for the threatened spaces in which
-		# there ARE pieces currently dealing with checks is gonna be impossible
 		threats_arr = []
 		piece_threats.map do |k, v|
 			v.each do |coordinates|
 				c = get_cell(coordinates)
 				if c.piece.nil?
-					next
+					threats_arr << coordinates
 				else
 					unless c.piece.color == color
 						threats_arr << coordinates
@@ -211,18 +256,28 @@ class Board
 	end
 
 	def move_piece(origin, destination)
-		# TODO use a variable to hold origin.piece
-		# set origin.piece to nil
-		# get cell on destination coordinates
-		# set destination.piece to piece
-		# if piece == pawn
-		# if pawn first_move.true?
-		# set first move to false
+		piece = origin.remove_piece()
+		destination.set_piece(piece)
+
+		if piece.instance_of?(Pawn)
+			if piece.first_move?()
+				piece.moved()
+			end
+		end
+		update_board()
+		nil
 	end
 
 	def capture_piece(origin, destination)
-		# TODO move destination.piece to a captured array
+		captured = destination.remove_piece()
+		if captured.color == "white"
+			@white_captured << captured
+		else
+			@black_captured << captured
+		end
 		# call move_piece(origin, destination)
+		move_piece(origin, destination)
+		nil
 	end
 
 	def get_cell(coordinates)
@@ -277,5 +332,8 @@ end
 
 
 b = Board.new()
-b.set_pieces()
+b.make_move("e2-e4", "white")
+b.make_move("d7-d5", "black")
+b.make_move("e4xd5", "white")
 puts b.render_board()
+

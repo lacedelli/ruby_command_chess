@@ -99,11 +99,12 @@ class Pawn < Piece
 		@name = "Pawn"
 	end
 
+	def first_move?()
+		@first_move
+	end
 	
 	def moved()
-		if @first_move 
-			@first_move = false
-		end
+		@first_move = false
 		nil
 	end
 
