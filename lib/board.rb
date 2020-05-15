@@ -5,6 +5,16 @@ class Board
 	attr_reader :grid
 
 	def initialize(data = [])
+
+		@white_k = nil
+		@black_k = nil
+		@white_captured = []
+		@black_captured = []
+		@white_threats = []
+		@black_theats = []
+		@check = false
+
+
 		unless data.empty?()
 			@grid = data
 		else
@@ -20,12 +30,13 @@ class Board
 			end
 			set_pieces()
 		end
-		@white_captured = []
-		@black_captured = []
-			nil
+		nil
 	end
 
 	def update_board()
+		@white_threats = []
+		@black_threats = []
+
 		@grid.each do |column|
 			column.map do |cell|
 				unless cell.has_piece?()
@@ -36,11 +47,18 @@ class Board
 					piece_threats = piece.get_threats(cell.coord)
 					moves_arr = get_move_spaces(piece_moves)
 					threats_arr = get_threat_spaces(piece_threats, piece.color)
+					update_threats_arrays(piece, threats_arr)
 					piece.update_moves(moves_arr, threats_arr)
 				end
 			end
 		end
+		# TODO DELETE ME
+		p "White threats"
+		p @white_threats
+		p "black threats"
+		p @black_threats
 		# TODO Make a method that checks for check threats for king
+		check_checkmate()
 		nil
 	end
 
@@ -94,21 +112,26 @@ class Board
 		# find starting coordinates
 		origin = get_cell(match[2])
 		if origin.nil?()
-			puts "couldn't find origin coordinates, remember they range from a1 to h8"
+			puts "Couldn't find origin coordinates, remember they range from a1 to h8."
 			return false
 		end
 
 		# Find operand
 		operand = match[3]
 		if operand.nil?()
-			puts "Couldn't recognize the operand, remember to use '-' or 'x'"
+			puts "Couldn't recognize the operand, remember to use '-' or 'x'."
 			return false 
 		end
 
 		# find ending coordinates
 		destination = get_cell(match[4])
 		if destination.nil?()
-			puts "couldn't find destination coordinates, remember they range from a1 to h8"
+			puts "Couldn't find destination coordinates, remember they range from a1 to h8."
+			return false
+		end
+
+		if origin == destination
+			puts "A piece can't move to its current space."
 			return false
 		end
 
@@ -124,6 +147,7 @@ class Board
 						if pawn.move_spaces.include?(destination.coord)
 						# move
 							move_piece(origin, destination)
+							return true
 						else
 							puts "Piece at #{origin.coord.join()} can't move to #{destination.coord.join()}."
 							return false
@@ -138,8 +162,9 @@ class Board
 								unless threatened_piece.color() == pawn.color
 									# capture
 									capture_piece(origin, destination)
+									return true
 								else
-									puts "The piece at #{destination.coord.join()} is the same color as the attacker!"
+									puts "The #{destination.piece.class()} at #{destination.coord.join()} is the same color as the attacker!"
 									return false
 								end
 							else
@@ -147,7 +172,7 @@ class Board
 								return false
 							end
 						else
-							puts "The selected piece doesn't threat #{destination.coord.join()}."
+							puts "The selected #{piece.class} doesn't threat #{destination.coord.join()}."
 							return false
 						end
 					end
@@ -161,7 +186,10 @@ class Board
 			end
 		else
 			# confirm that a piece exists in selected space
+			if origin.has_piece?()
+				piece = origin.piece()
 			# confirm that piece is the kind specified
+				if check_piece(piece, piece_str)
 			# if operand is -
 			# if move is in piece's range
 			# move
@@ -169,6 +197,14 @@ class Board
 			# if move is in pieces threats
 			# if enemy piece is in move
 			# capture
+				else
+					puts "Piece at #{origin.coord.join()} isn't specified type."
+					return false
+				end
+			else
+				puts "Space at #{origin.coord.join()} has no piece."
+				return false
+			end
 		end
 	end
 
@@ -182,7 +218,8 @@ class Board
 		create_piece(Bishop.new(color), "c1")
 		create_piece(Bishop.new(color), "f1")
 		create_piece(Queen.new(color), "d1")
-		create_piece(King.new(color), "e1")
+		@white_k = King.new(color)
+		create_piece(@white_k, "e1")
 		("a".."h").each do |letter|
 			create_piece(Pawn.new(color), "#{letter}2")
 		end
@@ -195,7 +232,8 @@ class Board
 		create_piece(Bishop.new(color), "c8")
 		create_piece(Bishop.new(color), "f8")
 		create_piece(Queen.new(color), "d8")
-		create_piece(King.new(color), "e8")
+		@black_k = King.new(color)
+		create_piece(@black_k, "e8")
 		("a".."h").each do |letter|
 			create_piece(Pawn.new(color), "#{letter}7")
 		end
@@ -222,7 +260,7 @@ class Board
 		piece_moves.map do |k, v|
 			v.each do |coordinates|
 				c = get_cell(coordinates)
-				if c.piece.nil?
+				unless c.has_piece?()
 					moves_arr << coordinates
 				else
 					break
@@ -237,11 +275,13 @@ class Board
 		piece_threats.map do |k, v|
 			v.each do |coordinates|
 				c = get_cell(coordinates)
-				if c.piece.nil?
+				unless c.has_piece?()
 					threats_arr << coordinates
 				else
 					unless c.piece.color == color
 						threats_arr << coordinates
+						break
+					else
 						break
 					end
 				end
@@ -305,6 +345,26 @@ class Board
 			counter += 1
 		end
 		nil
+	end
+
+	def update_threats_arrays(piece, threats_arr)
+		if piece.color() == "white"
+			threats_arr.map do |threat|
+				unless @white_threats.include?(threat)
+					@white_threats << threat
+				end
+			end
+		else
+			threats_arr.map do |threat|
+				unless @black_threats.include?(threat)
+					@black_threats << threat
+				end
+			end
+		end
+	end
+
+	def check_checkmate()
+		# TODO ADD CODE
 	end
 
 	def check_piece?(piece, p_input)
