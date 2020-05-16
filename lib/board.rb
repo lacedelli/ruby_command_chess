@@ -135,11 +135,11 @@ class Board
 		else
 			return false
 		end
-
 	end
-
 	
 	def checkmate?()
+		# TODO this is by definition incomplete, I have to make sure
+		# that no piece can block the attack vector.
 		blocked_moves = 0
 		total_moves = @white_k.move_spaces.length()
 		@white_k.move_spaces.map() do |move|
@@ -267,7 +267,12 @@ class Board
 			end
 		end
 		update_board()
+		king_check(piece, destination)
+	
+		nil
+	end
 
+	def king_check(piece, destination)
 		piece.threat_spaces.each do |space|
 			cell = get_cell(space)
 			if cell.has_piece?()
@@ -277,9 +282,8 @@ class Board
 				end
 			end
 		end
-
-		nil
 	end
+
 
 	def capture_piece(origin, destination)
 		captured = destination.remove_piece()
@@ -397,8 +401,6 @@ class Board
 					if piece.move_spaces.include?(destination.coord)
 						# If king is checked, only allow moves that block
 						# the threat.
-						# TODO if move opens up the king to an attack vector
-						# disallow it
 						if @check
 							threat_vector = get_threat_vector()
 							if threat_vector.include?(destination.coord)
@@ -410,6 +412,37 @@ class Board
 								return false
 							end
 						end
+						# TODO if move opens up the king to an attack vector
+						# disallow it
+						piece_temp_holder = origin.remove_piece()
+						update_board()
+						if color == "white"
+							@black_threats.each do |coord|
+								cell = get_cell(coord)
+								if cell.has_piece?()
+									if cell.piece() == @white_k
+										p "Move opens up King for attack."
+										origin.set_piece(piece_temp_holder)
+										update_board()
+										return false
+									end
+								end
+							end
+						else
+							@white_threats.each do |coord|
+								cell = get_cell(coord)
+								if cell.has_piece?()
+									if cell.piece() == @black_k
+										p "Move opens up King for attack."
+										origin.set_piece(piece_temp_holder)
+										update_board()
+										return false
+									end
+								end
+							end
+						end
+						origin.set_piece(piece_temp_holder)
+						update_board()
 					# move
 						return true
 					else
@@ -424,10 +457,10 @@ class Board
 						if destination.has_piece?()
 							threatened_piece = destination.piece()
 							unless threatened_piece.color() == piece.color
-								# If king is checked, only allow moves that 
-								# capture the threatening piece
 								# TODO if a capture opens up the king to an attack
 								# vector, disallow it
+								# If king is checked, only allow moves that 
+								# capture the threatening piece
 								if @check
 									if destination == @threat_cell
 										@check = false
@@ -467,10 +500,10 @@ end
 
 b = Board.new()
 b.make_move("e2-e4", "white")
-b.make_move("a7-a6", "black")
 b.make_move("d7-d5", "black")
 b.make_move("Bf1-b5", "white")
-b.make_move("a6xb5", "black")
-b.make_move("e4-e6", "white")
+b.make_move("b7-b6", "black")
+b.make_move("c7-c6", "black")
+b.make_move("c6-c5", "black")
 puts b.render_board()
 
