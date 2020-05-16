@@ -53,13 +53,6 @@ class Board
 				end
 			end
 		end
-		# TODO DELETE ME
-		p "White threats"
-		p @white_threats
-		p "black threats"
-		p @black_threats
-		# TODO Make a method that checks for check threats for king
-		check_checkmate()
 		nil
 	end
 
@@ -146,9 +139,40 @@ class Board
 					if operand == "-"
 					# if move is in range
 						if pawn.move_spaces.include?(destination.coord)
+							# TODO If king is checked, only allow moves that block
+							# the threat.
+							if @check
+								threat_vector = []
+								# TODO get the coordinates between threat piece
+								# & king
+								threats = @threat_piece.get_threats()
+								threats.each do |k,v|
+									threat_arr = []
+									v.each do |coord|
+										cell = get_cell(coord)
+										threat_arr << coord
+										if cell.has_piece?()
+											if cell.piece.instance_of?(King)
+												unless pawn.same_color?(cell.piece())
+													threat_vector = threat_arr
+												end
+											end
+										end
+									end
+								end
+								if threat_vector.include?(destination.coord)
+									# TODO Remove check status
+									@check = false
+									# set threat piece to nil
+									@threat_piece = nil
+									# move pawn
+									move_piece(origin, destination)
+								else
+									p "King is checked, but move didn't block attack vector of the #{@threat_piece.class()} threatening it."
+								end
+							end
 						# move
 							move_piece(origin, destination)
-							# TODO check if it threatens the king
 							return true
 						else
 							puts "Piece at #{origin.coord.join()} can't move to #{destination.coord.join()}."
@@ -162,9 +186,11 @@ class Board
 							if destination.has_piece?()
 								threatened_piece = destination.piece()
 								unless threatened_piece.color() == pawn.color
+									# TODO If king is checked, only allow moves that 
+									# capture the threatening piece
 									# capture
 									capture_piece(origin, destination)
-									# TODO check if it threatens the king
+									
 									return true
 								else
 									puts "The #{destination.piece.class()} at #{destination.coord.join()} is the same color as the attacker!"
@@ -197,14 +223,22 @@ class Board
 					#only accept moves that the king makes 
 					#or moves that destroy the threatening piece
 			# if operand is -
+					if operand == "-"
 			# if move is in piece's range
+						if piece.move_spaces.include?(destination.coord)
 					# if move is made by a king, 
 					# it can't move to a threatened space
 			# move
+							move_piece(origin, destination)
 			# if operand is X or x
+						else
+							p "Selected #{piece.class} cannot move to #{destination.coord.join()}"
+						end
+					else
 			# if move is in pieces threats
 			# if enemy piece is in move
 			# capture
+					end
 				else
 					puts "Piece at #{origin.coord.join()} isn't specified type."
 					return false
@@ -337,6 +371,16 @@ class Board
 	def move_piece(origin, destination)
 		piece = origin.remove_piece()
 		destination.set_piece(piece)
+		piece.threat_spaces.each do |space|
+			cell = get_cell(space)
+			if cell.has_piece?()
+				if cell.piece.instance_of?(King)
+					p
+					@check = true
+					@threat_piece = piece
+				end
+			end
+		end
 
 		if piece.instance_of?(Pawn)
 			if piece.first_move?()
@@ -400,27 +444,30 @@ class Board
 	def correct_piece?(piece, p_input)
 		# Check if the specified piece 
 		# is the type the player asserts it to be
-		case piece
-		when instance_of?(Queen)
+		piece_class = piece.class().to_s()
+		case piece_class
+		when "Queen"
 			if p_input.upcase() == "Q"
 				return true
 			end
-		when instance_of?(King)
+		when "King"
 			if p_input.upcase() == "K"
 				return true
 			end
-		when instance_of?(Bishop)
+		when "Bishop"
 			if p_input.upcase() == "B"
 				return true
 			end
-		when instance_of?(Rook)
+		when "Rook"
 			if p_input.upcase() == "R"
 				return true
 			end
-		when instance_of?(Knight)
+		when "Knight"
 			if p_input.upcase() == "N"
 				return true
 			end
+		else
+			return false
 		end
 	end
 
@@ -431,6 +478,7 @@ end
 b = Board.new()
 b.make_move("e2-e4", "white")
 b.make_move("d7-d5", "black")
-b.make_move("e4xd5", "white")
+b.make_move("Bf1-b5", "white")
+b.make_move("e7-e5", "black")
 puts b.render_board()
 
