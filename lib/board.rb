@@ -13,7 +13,7 @@ class Board
 		@white_threats = []
 		@black_theats = []
 		@check = false
-		@Threat_piece = nil
+		@threat_cell = nil
 
 
 		unless data.empty?()
@@ -93,11 +93,6 @@ class Board
 	end
 
 	def make_move(instruction, color)
-		# Parse the instruction 
-		# TODO save if instruction is "save"
-		if instruction.downcase() == "save"
-			save_game()
-		end
 
 		long_notation = /^([KQBNR]|[kqbnr])?([a-h][1-8])(-|x|X)([a-h][1-8])/
 		match = long_notation.match(instruction)
@@ -139,36 +134,18 @@ class Board
 					if operand == "-"
 					# if move is in range
 						if pawn.move_spaces.include?(destination.coord)
-							# TODO If king is checked, only allow moves that block
+							# If king is checked, only allow moves that block
 							# the threat.
 							if @check
-								threat_vector = []
-								# TODO get the coordinates between threat piece
-								# & king
-								threats = @threat_piece.get_threats()
-								threats.each do |k,v|
-									threat_arr = []
-									v.each do |coord|
-										cell = get_cell(coord)
-										threat_arr << coord
-										if cell.has_piece?()
-											if cell.piece.instance_of?(King)
-												unless pawn.same_color?(cell.piece())
-													threat_vector = threat_arr
-												end
-											end
-										end
-									end
-								end
+								threat_vector = get_threat_vector()
 								if threat_vector.include?(destination.coord)
-									# TODO Remove check status
 									@check = false
-									# set threat piece to nil
-									@threat_piece = nil
-									# move pawn
+									@threat_cell = nil
 									move_piece(origin, destination)
+									return true
 								else
-									p "King is checked, but move didn't block attack vector of the #{@threat_piece.class()} threatening it."
+									p "King is checked, but move didn't block attack vector of the #{@threat_cell.piece().class()} threatening it."
+									return false
 								end
 							end
 						# move
@@ -371,23 +348,24 @@ class Board
 	def move_piece(origin, destination)
 		piece = origin.remove_piece()
 		destination.set_piece(piece)
-		piece.threat_spaces.each do |space|
-			cell = get_cell(space)
-			if cell.has_piece?()
-				if cell.piece.instance_of?(King)
-					p
-					@check = true
-					@threat_piece = piece
-				end
-			end
-		end
-
+	
 		if piece.instance_of?(Pawn)
 			if piece.first_move?()
 				piece.moved()
 			end
 		end
 		update_board()
+
+		piece.threat_spaces.each do |space|
+			cell = get_cell(space)
+			if cell.has_piece?()
+				if cell.piece.instance_of?(King)
+					@check = true
+					@threat_cell = destination
+				end
+			end
+		end
+
 		nil
 	end
 
@@ -440,6 +418,26 @@ class Board
 		end
 	end
 
+	def get_threat_vector()
+		threat_vector = []
+		threats = @threat_cell.piece.get_threats(@threat_cell.coord)
+		threats.each do |k,v|
+			threat_arr = []
+			v.each do |coord|
+				cell = get_cell(coord)
+				threat_arr << coord
+				if cell.has_piece?()
+					if cell.piece.instance_of?(King)
+						unless @threat_cell.piece.same_color?(cell.piece())
+							threat_vector = threat_arr
+						end
+					end
+				end
+			end
+		end
+		threat_vector
+	end
+
 
 	def correct_piece?(piece, p_input)
 		# Check if the specified piece 
@@ -480,5 +478,6 @@ b.make_move("e2-e4", "white")
 b.make_move("d7-d5", "black")
 b.make_move("Bf1-b5", "white")
 b.make_move("e7-e5", "black")
+b.make_move("c7-c6", "black")
 puts b.render_board()
 
