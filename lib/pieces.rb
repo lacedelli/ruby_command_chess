@@ -127,6 +127,9 @@ class Pawn < Piece
 			moves[:up] = []
 			2.times do |step|
 				if valid_coordinates?([coord_a, coord_b + (step + 1)])
+					unless @first_move
+						break if step == 1
+					end
 					moves[:up] << [int_to_str(coord_a),coord_b + (step + 1)]
 				end
 			end
@@ -134,6 +137,9 @@ class Pawn < Piece
 				moves[:down] = []
 				2.times do |step|
 					if valid_coordinates?([coord_a, coord_b + (-step - 1)])
+						unless @first_move
+							break if step == 1
+						end
 						moves[:down] << [int_to_str(coord_a), coord_b + (-step -1)]
 					end
 				end
