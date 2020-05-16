@@ -160,8 +160,8 @@ class Pawn < Piece
 			if valid_coordinates?([coord_a - 1, coord_b - 1])
 				threats[:diag_down_left] << [int_to_str(coord_a - 1), coord_b - 1]
 			end
-			if valid_coordinates?([coord_a - 1, coord_b + 1])
-				threats[:diag_down_left] << [int_to_str(coord_a - 1), coord_b + 1]
+			if valid_coordinates?([coord_a + 1, coord_b - 1])
+				threats[:diag_down_right] << [int_to_str(coord_a + 1), coord_b - 1]
 			end
 		end
 		threats
