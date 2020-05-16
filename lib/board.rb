@@ -13,6 +13,7 @@ class Board
 		@white_threats = []
 		@black_theats = []
 		@check = false
+		@Threat_piece = nil
 
 
 		unless data.empty?()
@@ -147,6 +148,7 @@ class Board
 						if pawn.move_spaces.include?(destination.coord)
 						# move
 							move_piece(origin, destination)
+							# TODO check if it threatens the king
 							return true
 						else
 							puts "Piece at #{origin.coord.join()} can't move to #{destination.coord.join()}."
@@ -162,6 +164,7 @@ class Board
 								unless threatened_piece.color() == pawn.color
 									# capture
 									capture_piece(origin, destination)
+									# TODO check if it threatens the king
 									return true
 								else
 									puts "The #{destination.piece.class()} at #{destination.coord.join()} is the same color as the attacker!"
@@ -189,9 +192,14 @@ class Board
 			if origin.has_piece?()
 				piece = origin.piece()
 			# confirm that piece is the kind specified
-				if check_piece(piece, piece_str)
+				if correct_piece?(piece, piece_str)
+					#if king is checked
+					#only accept moves that the king makes 
+					#or moves that destroy the threatening piece
 			# if operand is -
 			# if move is in piece's range
+					# if move is made by a king, 
+					# it can't move to a threatened space
 			# move
 			# if operand is X or x
 			# if move is in pieces threats
@@ -238,6 +246,31 @@ class Board
 			create_piece(Pawn.new(color), "#{letter}7")
 		end
 		nil
+	end
+
+	def checkmate?()
+		blocked_moves = 0
+		total_moves = @white_k.move_spaces.length()
+		@white_k.move_spaces.map() do |move|
+			if @black_threats.include?(move)
+				blocked_moves += 1
+			end
+			if total_moves == blocked_moves
+				return true
+			end
+		end
+
+		blocked_moves = 0
+		total_moves = @black_k.move_spaces.length()
+		@black_k.move_spaces.map() do |move|
+			if @white_threats.include?(move)
+				blocked_moves += 1
+			end
+			if total_moves == blocked_moves
+				return true
+			end
+		end
+		false
 	end
 
 	private
@@ -363,11 +396,8 @@ class Board
 		end
 	end
 
-	def check_checkmate()
-		# TODO ADD CODE
-	end
 
-	def check_piece?(piece, p_input)
+	def correct_piece?(piece, p_input)
 		# Check if the specified piece 
 		# is the type the player asserts it to be
 		case piece
@@ -393,6 +423,7 @@ class Board
 			end
 		end
 	end
+
 	nil
 end
 
