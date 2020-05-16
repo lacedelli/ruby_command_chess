@@ -124,119 +124,18 @@ class Board
 			return false
 		end
 
-		if piece_str.nil?()
-			# Check if pawn is in coordinates
-			if origin.piece.instance_of?(Pawn)
-			# Chech if pawn is same color as player
-				pawn = origin.piece
-				if pawn.color == color
-				# if operand is -
-					if operand == "-"
-					# if move is in range
-						if pawn.move_spaces.include?(destination.coord)
-							# If king is checked, only allow moves that block
-							# the threat.
-							# TODO if move opens up the king to an attack vector
-							# disallow it
-							if @check
-								threat_vector = get_threat_vector()
-								if threat_vector.include?(destination.coord)
-									@check = false
-									@threat_cell = nil
-									move_piece(origin, destination)
-									return true
-								else
-									p "King is checked, but move didn't block attack vector of the #{@threat_cell.piece().class()} threatening it."
-									return false
-								end
-							end
-						# move
-							move_piece(origin, destination)
-							return true
-						else
-							puts "Piece at #{origin.coord.join()} can't move to #{destination.coord.join()}."
-							return false
-						end
-					# if operand is x or X
-					else
-					# if destination is in range
-						if pawn.threat_spaces.include?(destination.coord())
-					# if piece is in destination
-							if destination.has_piece?()
-								threatened_piece = destination.piece()
-								unless threatened_piece.color() == pawn.color
-									# TODO If king is checked, only allow moves that 
-									# capture the threatening piece
-									if @check
-										if destination == @threat_cell
-											@check = false
-											@threat_cell = nil
-											capture_piece(origin, destination)
-											return true
-										else
-											p "The #{destination.piece().class()} that you're attempting to capture isnt the #{@threat_cell.piece().class()} that's threatening the King}"
-										end
-									end
-									# capture
-									capture_piece(origin, destination)
-									
-									return true
-								else
-									puts "The #{destination.piece.class()} at #{destination.coord.join()} is the same color as the attacker!"
-									return false
-								end
-							else
-								puts "The threatened space #{destination.coord.join()} is empty."
-								return false
-							end
-						else
-							puts "The selected #{pawn.class} doesn't threat #{destination.coord.join()}."
-							return false
-						end
-					end
-				else
-					puts "You selected a piece from a different color."
-					return false
-				end
+		if possible_move?(piece_str, color, origin, operand, destination)
+			if operand == "-"
+				move_piece(origin, destination)
+				return true
 			else
-				puts "The piece at Coordinates #{origin.coord.join()} is not the type specified."
-				return false
+				capture_piece(origin, destination)
+				return true
 			end
 		else
-			# confirm that a piece exists in selected space
-			if origin.has_piece?()
-				piece = origin.piece()
-			# confirm that piece is the kind specified
-				if correct_piece?(piece, piece_str)
-					#if king is checked
-					#only accept moves that the king makes 
-					#or moves that destroy the threatening piece
-			# if operand is -
-					if operand == "-"
-			# if move is in piece's range
-						if piece.move_spaces.include?(destination.coord)
-					# if move is made by a king, 
-					# it can't move to a threatened space
-			# move
-							move_piece(origin, destination)
-			# if operand is X or x
-						else
-							p "Selected #{piece.class} cannot move to #{destination.coord.join()}"
-						end
-					else
-			# if move is in pieces threats
-			# if enemy piece is in move
-			# capture
-					end
-				else
-					puts "Piece at #{origin.coord.join()} isn't specified type."
-					return false
-				end
-			else
-				puts "Space at #{origin.coord.join()} has no piece."
-				return false
-			end
+			return false
 		end
+
 	end
 
 	def set_pieces()
@@ -314,12 +213,12 @@ class Board
 	def get_move_spaces(piece_moves)
 		moves_arr = []
 		piece_moves.map do |k, v|
-			v.each do |coordinates|
+			v.map do |coordinates|
 				c = get_cell(coordinates)
-				unless c.has_piece?()
-					moves_arr << coordinates
-				else
+				if c.has_piece?()
 					break
+				else
+					moves_arr << coordinates
 				end
 			end
 		end
@@ -476,11 +375,91 @@ class Board
 			if p_input.upcase() == "N"
 				return true
 			end
+		when "Pawn"
+			if p_input == nil
+				return true
+			end
 		else
 			return false
 		end
 	end
 
+	def possible_move?(piece_str, color, origin, operand, destination)
+		# Check if piece is the tipe specified
+		if correct_piece?(origin.piece(), piece_str)
+			# Check if piece is the color of player
+			piece = origin.piece
+			if piece.color == color
+			# if operand is -
+				if operand == "-"
+				# if move is in range
+					if piece.move_spaces.include?(destination.coord)
+						# If king is checked, only allow moves that block
+						# the threat.
+						# TODO if move opens up the king to an attack vector
+						# disallow it
+						if @check
+							threat_vector = get_threat_vector()
+							if threat_vector.include?(destination.coord)
+								@check = false
+								@threat_cell = nil
+								return true
+							else
+								p "King is checked, but move didn't block attack vector of the #{@threat_cell.piece().class()} threatening it."
+								return false
+							end
+						end
+					# move
+						return true
+					else
+						puts "The #{piece.class} at #{origin.coord.join()} can't move to #{destination.coord.join()}."
+						return false
+					end
+				# if operand is x or X
+				else
+					# if destination is in range
+					if piece.threat_spaces.include?(destination.coord())
+						# if piece is in destination
+						if destination.has_piece?()
+							threatened_piece = destination.piece()
+							unless threatened_piece.color() == piece.color
+								# If king is checked, only allow moves that 
+								# capture the threatening piece
+								# TODO if a capture opens up the king to an attack
+								# vector, disallow it
+								if @check
+									if destination == @threat_cell
+										@check = false
+										@threat_cell = nil
+										return true
+									else
+										p "The #{destination.piece().class()} that you're attempting to capture isnt the #{@threat_cell.piece().class()} that's threatening the King}"
+									end
+								end
+								# capture
+								return true
+							else
+								puts "The #{destination.piece.class()} at #{destination.coord.join()} is the same color as the attacker!"
+								return false
+							end
+						else
+							puts "The threatened space #{destination.coord.join()} is empty."
+							return false
+						end
+					else
+						puts "The selected #{piece.class} doesn't threat #{destination.coord.join()}."
+						return false
+					end
+				end
+			else
+				puts "You selected a piece from a different color."
+				return false
+			end
+		else
+			puts "The piece at Coordinates #{origin.coord.join()} is not the type specified."
+			return false
+		end
+	end
 	nil
 end
 
