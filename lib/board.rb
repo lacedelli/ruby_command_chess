@@ -136,6 +136,8 @@ class Board
 						if pawn.move_spaces.include?(destination.coord)
 							# If king is checked, only allow moves that block
 							# the threat.
+							# TODO if move opens up the king to an attack vector
+							# disallow it
 							if @check
 								threat_vector = get_threat_vector()
 								if threat_vector.include?(destination.coord)
@@ -165,6 +167,16 @@ class Board
 								unless threatened_piece.color() == pawn.color
 									# TODO If king is checked, only allow moves that 
 									# capture the threatening piece
+									if @check
+										if destination == @threat_cell
+											@check = false
+											@threat_cell = nil
+											capture_piece(origin, destination)
+											return true
+										else
+											p "The #{destination.piece().class()} that you're attempting to capture isnt the #{@threat_cell.piece().class()} that's threatening the King}"
+										end
+									end
 									# capture
 									capture_piece(origin, destination)
 									
@@ -178,7 +190,7 @@ class Board
 								return false
 							end
 						else
-							puts "The selected #{piece.class} doesn't threat #{destination.coord.join()}."
+							puts "The selected #{pawn.class} doesn't threat #{destination.coord.join()}."
 							return false
 						end
 					end
@@ -475,9 +487,9 @@ end
 
 b = Board.new()
 b.make_move("e2-e4", "white")
+b.make_move("a7-a6", "black")
 b.make_move("d7-d5", "black")
 b.make_move("Bf1-b5", "white")
-b.make_move("e7-e5", "black")
-b.make_move("c7-c6", "black")
+b.make_move("a6xb5", "black")
 puts b.render_board()
 
