@@ -138,6 +138,35 @@ class Board
 
 	end
 
+	
+	def checkmate?()
+		blocked_moves = 0
+		total_moves = @white_k.move_spaces.length()
+		@white_k.move_spaces.map() do |move|
+			if @black_threats.include?(move)
+				blocked_moves += 1
+			end
+			if total_moves == blocked_moves
+				return true
+			end
+		end
+
+		blocked_moves = 0
+		total_moves = @black_k.move_spaces.length()
+		@black_k.move_spaces.map() do |move|
+			if @white_threats.include?(move)
+				blocked_moves += 1
+			end
+			if total_moves == blocked_moves
+				return true
+			end
+		end
+		false
+	end
+
+	private
+	attr_writer :grid, :white_captured, :black_captured
+
 	def set_pieces()
 		# Create white pieces
 		color = "white"
@@ -169,34 +198,6 @@ class Board
 		end
 		nil
 	end
-
-	def checkmate?()
-		blocked_moves = 0
-		total_moves = @white_k.move_spaces.length()
-		@white_k.move_spaces.map() do |move|
-			if @black_threats.include?(move)
-				blocked_moves += 1
-			end
-			if total_moves == blocked_moves
-				return true
-			end
-		end
-
-		blocked_moves = 0
-		total_moves = @black_k.move_spaces.length()
-		@black_k.move_spaces.map() do |move|
-			if @white_threats.include?(move)
-				blocked_moves += 1
-			end
-			if total_moves == blocked_moves
-				return true
-			end
-		end
-		false
-	end
-
-	private
-	attr_writer :grid, :white_captured, :black_captured
 
 	def create_piece(piece, coord)
 		cell = get_cell(coord)
@@ -470,5 +471,6 @@ b.make_move("a7-a6", "black")
 b.make_move("d7-d5", "black")
 b.make_move("Bf1-b5", "white")
 b.make_move("a6xb5", "black")
+b.make_move("e4-e6", "white")
 puts b.render_board()
 
