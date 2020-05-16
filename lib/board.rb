@@ -388,6 +388,37 @@ class Board
 			return false
 		end
 	end
+	
+	def endangers_king?(origin, color)
+		piece_temp_holder = origin.remove_piece()
+		update_board()
+		if color == "white"
+			@black_threats.each do |coord|
+				cell = get_cell(coord)
+				if cell.has_piece?()
+					if cell.piece() == @white_k
+						origin.set_piece(piece_temp_holder)
+						update_board()
+						return true
+					end
+				end
+			end
+		else
+			@white_threats.each do |coord|
+				cell = get_cell(coord)
+				if cell.has_piece?()
+					if cell.piece() == @black_k
+						origin.set_piece(piece_temp_holder)
+						update_board()
+						return true
+					end
+				end
+			end
+		end
+		origin.set_piece(piece_temp_holder)
+		update_board()
+		false
+	end
 
 	def possible_move?(piece_str, color, origin, operand, destination)
 		# Check if piece is the tipe specified
@@ -412,38 +443,13 @@ class Board
 								return false
 							end
 						end
-						# TODO if move opens up the king to an attack vector
+						# if move opens up the king to an attack vector
 						# disallow it
-						piece_temp_holder = origin.remove_piece()
-						update_board()
-						if color == "white"
-							@black_threats.each do |coord|
-								cell = get_cell(coord)
-								if cell.has_piece?()
-									if cell.piece() == @white_k
-										p "Move opens up King for attack."
-										origin.set_piece(piece_temp_holder)
-										update_board()
-										return false
-									end
-								end
-							end
-						else
-							@white_threats.each do |coord|
-								cell = get_cell(coord)
-								if cell.has_piece?()
-									if cell.piece() == @black_k
-										p "Move opens up King for attack."
-										origin.set_piece(piece_temp_holder)
-										update_board()
-										return false
-									end
-								end
-							end
+						if endangers_king?(origin, color)
+							p "Move opens up king for attack."
+							return false
 						end
-						origin.set_piece(piece_temp_holder)
-						update_board()
-					# move
+						# move
 						return true
 					else
 						puts "The #{piece.class} at #{origin.coord.join()} can't move to #{destination.coord.join()}."
@@ -457,8 +463,6 @@ class Board
 						if destination.has_piece?()
 							threatened_piece = destination.piece()
 							unless threatened_piece.color() == piece.color
-								# TODO if a capture opens up the king to an attack
-								# vector, disallow it
 								# If king is checked, only allow moves that 
 								# capture the threatening piece
 								if @check
@@ -469,6 +473,12 @@ class Board
 									else
 										p "The #{destination.piece().class()} that you're attempting to capture isnt the #{@threat_cell.piece().class()} that's threatening the King}"
 									end
+								end
+								# if a capture opens up the king to an attack
+								# vector, disallow it
+								if endangers_king?(origin, color)
+									p "Move endangers king."
+									return false
 								end
 								# capture
 								return true
