@@ -98,6 +98,10 @@ class Board
 		match = long_notation.match(instruction)
 		piece_str = match[1]
 
+		if piece_str.nil?
+			piece_str = ""
+		end
+
 		# find starting coordinates
 		origin = get_cell(match[2])
 		if origin.nil?()
@@ -138,8 +142,10 @@ class Board
 	end
 	
 	def checkmate?()
-		# TODO this is by definition incomplete, I have to make sure
-		# that no piece can block the attack vector.
+		no_king_moves = false
+		no_capturing_possibility = false
+		no_blocking_moves = false
+		moves_array = []
 		blocked_moves = 0
 		total_moves = @white_k.move_spaces.length()
 		@white_k.move_spaces.map() do |move|
@@ -147,10 +153,39 @@ class Board
 				blocked_moves += 1
 			end
 			if total_moves == blocked_moves
-				return true
+				no_king_moves = true
+			end
+		end
+		if @checked
+			unless @white_threats.include?(@threat_cell.coord())
+				no_capturing_possibility = true
+			end
+			@grid.map do |row|
+				row.map do |cell|
+					if cell.has_piece?()
+						if cell.piece.color == "white"
+							cell.piece.moves.map do |coord|
+								unless moves_array.include?(coord)
+									moves_array << coord
+								end
+							end
+						end
+					end
+				end
+			end
+			if moves_array.empty?()
+				no_blocking_moves = true
 			end
 		end
 
+		if no_blocking_moves && no_capturing_possibilities && no_king_moves
+			return true
+		end
+
+		no_king_moves = false
+		no_capturing_possibility = false
+		no_blocking_moves = false
+		moves_array = []
 		blocked_moves = 0
 		total_moves = @black_k.move_spaces.length()
 		@black_k.move_spaces.map() do |move|
@@ -158,9 +193,35 @@ class Board
 				blocked_moves += 1
 			end
 			if total_moves == blocked_moves
-				return true
+				no_king_moves = true
 			end
 		end
+		if @checked
+			unless @black_threats.include?(@threat_cell.coord())
+				no_capturing_possibility = true
+			end
+			@grid.map do |row|
+				row.map do |cell|
+					if cell.has_piece?()
+						if cell.piece.color == "black"
+							cell.piece.moves.map do |coord|
+								unless moves_array.include?(coord)
+									moves_array << coord
+								end
+							end
+						end
+					end
+				end
+			end
+			if moves_array.empty?()
+				no_blocking_moves = true
+			end
+		end
+
+		if no_blocking_moves && no_capturing_possibilities && no_king_moves
+			return true
+		end
+
 		false
 	end
 
@@ -279,6 +340,7 @@ class Board
 				if cell.piece.instance_of?(King)
 					@check = true
 					@threat_cell = destination
+					p "Check by #{piece.class()}."
 				end
 			end
 		end
@@ -381,7 +443,7 @@ class Board
 				return true
 			end
 		when "Pawn"
-			if p_input == nil
+			if p_input == ""
 				return true
 			end
 		else
@@ -449,6 +511,20 @@ class Board
 							p "Move opens up king for attack."
 							return false
 						end
+						# if a king attempts to move into a threatened space, deny it
+						if piece.instance_of?(King)
+							if piece.color == "white"
+								if @black_threats.include(destination.coord)
+									p "The king can't move to a threatened space."
+									return false
+								end
+							else
+								if @white_threats.include(destination.coord)
+									p "The king can't move to a threatened space."
+									return false
+								end
+							end
+						end
 						# move
 						return true
 					else
@@ -480,6 +556,21 @@ class Board
 									p "Move endangers king."
 									return false
 								end
+								# if a king attempts to capture a piece that opens up a
+								# threatened space, deny it
+								if piece.instance_of?(King)
+									if piece.color == "white"
+										if @black_threats.include(destination.coord)
+											p "The king can't move to a threatened space."
+											return false
+										end
+									else
+										if @white_threats.include(destination.coord)
+											p "The king can't move to a threatened space."
+											return false
+										end
+									end
+								end
 								# capture
 								return true
 							else
@@ -508,12 +599,12 @@ class Board
 end
 
 
-b = Board.new()
-b.make_move("e2-e4", "white")
-b.make_move("d7-d5", "black")
-b.make_move("Bf1-b5", "white")
-b.make_move("b7-b6", "black")
-b.make_move("c7-c6", "black")
-b.make_move("c6-c5", "black")
-puts b.render_board()
+#b = Board.new()
+#b.make_move("e2-e4", "white")
+#b.make_move("d7-d5", "black")
+#b.make_move("Bf1-b5", "white")
+#b.make_move("b7-b6", "black")
+#b.make_move("c7-c6", "black")
+#b.make_move("c6-c5", "black")
+#puts b.render_board()
 
