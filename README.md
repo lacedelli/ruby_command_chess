@@ -20,3 +20,31 @@ or rooking.
 See you in a month, I guess!
 
 01 / May / 2020
+
+## Thoughts after being done
+
+Well, here we are, I "finished" this project.
+It's an ok thing, but after working all the time I did on it, I think I am a
+little biased on its favor; I think it's still pretty barebones, and there's 
+some things that I think I should have done differently, but after a certain
+point in time, I had to stick to my guns and carry on with the choices I made
+when it came to the design principles of the game.
+
+Specially right after the restructure I had to make during the middle of the project. 
+
+### What I would have done differently
+
+When I decided how to implement the player input I chose to use the long
+algebraic system to make it easier on me at the beginning, but it turned out
+that using a longer system has more opportunities for the use to break the
+program, and; oh boy, is this program prone to breaking.
+
+The internal workings of the game are definitely over-engineered, of that I'm 
+sure, but I did what I could with what I had, and, I think that it is a
+sufficiently good system.
+
+It would be great to make an extension that could read game files off the
+internet and recreate them, but that's somewhat more advanced than what I 
+think I can achieve; but, then again, also was this entire project.
+
+17 / May / 2020
