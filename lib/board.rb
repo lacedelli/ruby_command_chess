@@ -1,3 +1,4 @@
+require 'json'
 require_relative "cell.rb"
 require_relative "pieces.rb"
 
@@ -15,21 +16,47 @@ class Board
 		@check = false
 		@threat_cell = nil
 
-
-		unless data.empty?()
-			@grid = data
-		else
-			@grid = data
+		if data.empty?
+			@grid = []
 			hor_range = ("a".."h")
 			counter = 0
 			hor_range.each do |col|
-				@grid << []
+			@grid << []
 				8.times do |row|
 					@grid[counter] << Cell.new([col, row + 1])
 				end
 				counter += 1
 			end
 			set_pieces()
+		else
+			@grid = []
+			hor_range = ("a".."h")
+			counter = 0
+			hor_range.each do |col|
+			@grid << []
+				8.times do |row|
+					@grid[counter] << Cell.new([col, row + 1])
+				end
+				counter += 1
+			end
+			data.map do |k,v|
+				cell = get_cell(k)
+				case v[0]
+				when "Pawn"
+					cell.set_piece(Pawn.new(v[1]))
+				when "Rook"
+					cell.set_piece(Rook.new(v[1]))
+				when "Knight"
+					cell.set_piece(Knight.new(v[1]))
+				when "Bishop"
+					cell.set_piece(Bishop.new(v[1]))
+				when "Queen"
+					cell.set_piece(Queen.new(v[1]))
+				when "King"
+					cell.set_piece(King.new(v[1]))
+				end
+				update_board()
+			end
 		end
 		nil
 	end
@@ -223,6 +250,24 @@ class Board
 		end
 
 		false
+	end
+
+	def to_json()
+		local_grid = @grid
+		piece_hash = {}
+		local_grid.map do |row|
+			row.map do |cell|
+				if cell.has_piece?()
+					piece_hash[cell.coord.join()] = [cell.piece.class, cell.piece.color]
+				end
+			end
+		end
+		JSON.dump(piece_hash)
+	end
+
+	def self.from_json(string)
+		data = JSON.load(string)
+		self.new(data)
 	end
 
 	private
